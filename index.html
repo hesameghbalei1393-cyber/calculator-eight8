@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>ماشین‌حساب جامع — Eight⁸</title>
+<meta name="theme-color" content="#07090d">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#07090d; --s1:rgba(255,255,255,.05); --s2:rgba(255,255,255,.09); --bd:rgba(255,255,255,.10);
+  --tx:#f4f6fa; --dim:#98a1b3; --ac:#4dabf7; --ac2:#3ddc97; --op:#ffb84d; --danger:#ff5d7a;
+  --grad:linear-gradient(135deg,#4dabf7,#3ddc97); --r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{height:100%;background:var(--bg);color:var(--tx);overflow:hidden;overscroll-behavior:none;
+  font-family:system-ui,"Vazirmatn","Noto Sans Arabic",Tahoma,sans-serif;-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input{font:inherit;color:inherit;background:none;border:0}
+.screen{position:fixed;inset:0;display:none;overflow-y:auto;overflow-x:hidden;
+  padding:calc(env(safe-area-inset-top,0px) + 14px) 16px calc(env(safe-area-inset-bottom,0px) + 24px)}
+.screen.active{display:block;animation:fd .22s ease-out}
+@keyframes fd{from{opacity:0;transform:translateY(6px)}}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.top h2{font-size:19px;font-weight:800}
+.back{width:40px;height:40px;border-radius:13px;background:var(--s1);border:1px solid var(--bd);display:grid;place-items:center;flex:none}
+.back:active{background:var(--s2)}
+.sec{font-size:13px;color:var(--dim);margin:18px 2px 8px;font-weight:600}
+
+/* ---- خانه ---- */
+#scr-home{background:radial-gradient(120% 55% at 50% -6%,rgba(77,171,247,.2),transparent 60%),var(--bg)}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:14px 0 6px}
+.logo{width:84px;height:84px;border-radius:24px;display:grid;place-items:center;background:linear-gradient(160deg,#1c212c,#0b0d12);
+  border:1px solid var(--bd);box-shadow:0 14px 40px rgba(0,0,0,.5);font-size:38px}
+.hero h1{font-size:22px;margin-top:12px;font-weight:800}
+.hero p{color:var(--dim);font-size:13px;margin-top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{display:flex;flex-direction:column;gap:8px;align-items:flex-start;text-align:right;padding:14px;
+  border-radius:var(--r);background:var(--s1);border:1px solid var(--bd)}
+.card:active{background:var(--s2)}
+.card .ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--s2);font-size:19px}
+.card b{font-size:14.5px}
+.card small{color:var(--dim);font-size:11.5px;line-height:1.6}
+.foot{margin-top:20px;text-align:center;color:var(--dim);font-size:12px;line-height:1.9}
+
+/* ---- نمایشگر مشترک ---- */
+.disp{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:18px 16px;margin-bottom:14px}
+.disp .expr{color:var(--dim);font-size:14px;min-height:20px;direction:ltr;text-align:left;overflow-x:auto;white-space:nowrap}
+.disp .val{font-size:38px;font-weight:700;direction:ltr;text-align:left;overflow-x:auto;white-space:nowrap;margin-top:4px}
+.disp.small .val{font-size:26px}
+
+/* ---- کلیدهای ماشین‌حساب ساده ---- */
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.key{padding:18px 0;border-radius:16px;background:var(--s1);border:1px solid var(--bd);font-size:19px;font-weight:600;text-align:center}
+.key:active{background:var(--s2)}
+.key.op{background:rgba(77,171,247,.14);color:var(--ac);border-color:rgba(77,171,247,.3)}
+.key.eq{background:var(--grad);color:#06140d;font-weight:800}
+.key.fn{background:rgba(255,255,255,.04);color:var(--dim);font-size:15px}
+.key.wide{grid-column:span 2}
+
+/* ---- علمی ---- */
+.sci-toggle{display:flex;gap:8px;margin-bottom:10px}
+.sci-toggle button{flex:1;padding:10px;border-radius:14px;background:var(--s1);border:1px solid var(--bd);font-size:13px;color:var(--dim)}
+.sci-toggle button.on{background:rgba(77,171,247,.16);color:var(--ac);border-color:rgba(77,171,247,.35)}
+.keys.sci{grid-template-columns:repeat(5,1fr)}
+.keys.sci .key{padding:14px 0;font-size:15px}
+
+/* ---- تبدیل واحد ---- */
+.conv-box{background:var(--s1);border:1px solid var(--bd);border-radius:18px;padding:16px;margin-bottom:12px}
+.conv-row{display:flex;align-items:center;gap:10px}
+.conv-row input{flex:1;font-size:24px;direction:ltr;text-align:left}
+.conv-row select{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;color:var(--tx);font-size:13.5px}
+.swap{width:44px;height:44px;border-radius:14px;background:var(--s2);display:grid;place-items:center;margin:8px auto;font-size:18px}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{padding:8px 14px;border-radius:999px;background:var(--s1);border:1px solid var(--bd);font-size:12.5px;color:var(--dim)}
+.chip.on{background:rgba(61,220,151,.16);color:var(--ac2);border-color:rgba(61,220,151,.35)}
+
+/* ---- فرم‌های عمومی (BMI، تاریخ، درصد، وام) ---- */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;color:var(--dim);margin-bottom:7px}
+.field .box{display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:12px 14px}
+.field input{flex:1;font-size:17px;direction:ltr;text-align:left}
+.field .unit{color:var(--dim);font-size:13px}
+.seg{display:flex;gap:8px;margin-bottom:14px}
+.seg button{flex:1;padding:11px;border-radius:14px;background:var(--s1);border:1px solid var(--bd);font-size:13.5px}
+.seg button.on{background:var(--grad);color:#06140d;font-weight:700;border-color:transparent}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;border-radius:16px;
+  background:var(--grad);color:#06140d;font-weight:800;font-size:16px;margin-top:6px}
+.btn:active{transform:scale(.985)}
+.result-card{margin-top:16px;padding:18px;border-radius:18px;background:var(--s1);border:1px solid var(--bd);text-align:center}
+.result-card .big{font-size:32px;font-weight:800;color:var(--ac2)}
+.result-card .lbl{color:var(--dim);font-size:13px;margin-top:6px;line-height:1.8}
+.result-card.warn .big{color:var(--op)}
+.result-card.bad .big{color:var(--danger)}
+
+/* ---- تاریخچه ---- */
+.hrow{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;border-radius:14px;
+  background:var(--s1);border:1px solid var(--bd);margin-bottom:8px}
+.hrow .ex{color:var(--dim);font-size:12.5px;direction:ltr;text-align:left}
+.hrow .rs{font-size:16px;font-weight:700;direction:ltr}
+.empty{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;color:var(--dim);padding:60px 20px;font-size:13.5px;line-height:1.9}
+
+/* ---- تنظیمات ---- */
+.row{display:flex;align-items:center;gap:12px;padding:13px;border-radius:15px;background:var(--s1);border:1px solid var(--bd);margin-bottom:9px}
+.row .t{flex:1}
+.row .t b{display:block;font-size:14px}
+.row .t small{display:block;color:var(--dim);font-size:11.5px;margin-top:2px}
+.sw{position:relative;width:46px;height:27px;border-radius:99px;background:var(--s2);border:1px solid var(--bd);flex:none}
+.sw::after{content:'';position:absolute;top:3px;right:3px;width:19px;height:19px;border-radius:50%;background:#cfd6e4;transition:.2s}
+.sw.on{background:var(--grad);border-color:transparent}
+.sw.on::after{right:22px;background:#06140d}
+
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 30px);transform:translateX(-50%);z-index:90;
+  background:rgba(24,28,37,.96);border:1px solid var(--bd);padding:10px 18px;border-radius:99px;font-size:13.5px;
+  opacity:0;pointer-events:none;transition:opacity .25s;max-width:88vw;text-align:center}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ======================= خانه ======================= -->
+<section id="scr-home" class="screen active">
+  <div class="hero">
+    <div class="logo">🧮</div>
+    <h1>ماشین‌حساب جامع</h1>
+    <p>یک ابزار، چند کاربرد</p>
+  </div>
+  <div class="grid2">
+    <button class="card" data-go="basic"><span class="ico">➗</span><b>ماشین‌حساب ساده</b><small>چهار عمل اصلی و درصد</small></button>
+    <button class="card" data-go="sci"><span class="ico">∑</span><b>علمی</b><small>توان، جذر، مثلثاتی، لگاریتم</small></button>
+    <button class="card" data-go="conv"><span class="ico">⇄</span><b>تبدیل واحد</b><small>طول، وزن، دما، مساحت</small></button>
+    <button class="card" data-go="percent"><span class="ico">٪</span><b>درصد</b><small>درصد از عدد، تغییر درصدی</small></button>
+    <button class="card" data-go="bmi"><span class="ico">⚖️</span><b>شاخص توده بدنی</b><small>BMI بر اساس قد و وزن</small></button>
+    <button class="card" data-go="date"><span class="ico">📅</span><b>تاریخ و سن</b><small>فاصله‌ی دو تاریخ، سن دقیق</small></button>
+    <button class="card" data-go="loan"><span class="ico">🏦</span><b>اقساط وام</b><small>محاسبه‌ی قسط ماهانه</small></button>
+    <button class="card" data-go="discount"><span class="ico">🏷️</span><b>تخفیف</b><small>قیمت نهایی و مبلغ تخفیف</small></button>
+    <button class="card" data-go="history"><span class="ico">🕘</span><b>تاریخچه</b><small>محاسبات اخیر</small></button>
+    <button class="card" data-go="settings"><span class="ico">⚙️</span><b>تنظیمات</b><small>ظاهر و رفتار برنامه</small></button>
+    <button class="card" data-go="about" style="grid-column:span 2"><span class="ico">ℹ️</span><b>درباره ما</b><small>ارتباط با Eight⁸ و ارسال بازخورد</small></button>
+  </div>
+  <div class="foot">ساخته‌شده توسط Eight⁸<br>نسخه <span id="verHome"></span></div>
+</section>
+
+<!-- ======================= ساده ======================= -->
+<section id="scr-basic" class="screen">
+  <div class="top"><button class="back" data-back>‹</button><h2>ماشین‌حساب ساده</h2></div>
+  <div class="disp"><div class="expr" id="bExpr">&nbsp;</div><div class="val" id="bVal">۰</div></div>
+  <div class="keys" id="bKeys"></div>
+</section>
+
+<!-- ======================= علمی ======================= -->
+<section id="scr-sci" class="screen">
+  <div class="top"><button class="back" data-back>‹</button><h2>ماشین‌حساب علمی</h2></div>
+  <div class="disp small"><div class="expr" id="sExpr">&nbsp;</div><div class="val" id="sVal">۰</div></div>
+  <div class="sci-toggle">
+    <button id="sDeg" class="on">درجه (deg)</button>
+    <button id="sRad">رادیان (rad)</button>
+  </div>
+  <div class="keys sci" id="sKeys"></div>
+</section>
+
+<!-- ======================= تبدیل واحد ======================= -->
+<section id="scr-conv" class="screen">
+  <div class="top"><button class="back" data-back>‹</button><h2>تبدیل واحد</h2></div>
+  <div class="chiprow" id="convCats"></div>
+  <div class="sec">از</div>
+  <div class="conv-box"><div class="conv-row"><input id="cFromVal" inputmode="decimal" value="1"><select id="cFromUnit"></select></div></div>
+  <button class="swap" id="cSwap">⇅</button>
+  <div class="sec">به</div>
+  <div class="conv-box"><div class="conv-row"><input id="cToVal" readonly value="0"><select id="cToUnit"></select></div></div>
+</section>
+
+<!-- ======================= درصد ======================= -->
+<section id="scr-percent" class="screen">
+  <div class="top"><button class="back" data-back>‹</button><h2>محاسبه‌ی درصد</h2></div>
+  <div class="seg" id="pMode">
+    <button class="on" data-m="of">٪ از یک عدد</button>
+    <button data-m="change">تغییر بین دو عدد</button>
+  </div>
+  <div id="pOf">
+    <div class="field"><label>چند درصد؟</label><div class="box"><input id="p1" inputmode="decimal" placeholder="مثلاً ۱۵"><span class="unit">٪</span></div></div>
+    <div class="field"><label>از چه عددی؟</label><div class="box"><input id="p2" inputmode="decimal" placeholder="مثلاً ۲۰۰۰۰۰"></div></div>
+  </div>
+  <div id="pChange" hidden>
+    <div class="field"><label>عدد اول</label><div class="box"><input id="p3" inputmode="decimal" placeholder="مقدار قبل"></div></div>
+    <div class="field"><label>عدد دوم</label><div class="box"><input id="p4" inputmode="decimal" placeholder="مقدار بعد"></div></div>
+  </div>
+  <button class="btn" id="pCalc">محاسبه</button>
+  <div class="result-card" id="pResult" hidden><div class="big" id="pBig"></div><div class="lbl" id="pLbl"></div></div>
+</section>
+
+<!-- ======================= BMI ======================= -->
+<section id="scr-bmi" class="screen">
+  <div class="top"><button class="back" data-back>‹</button><h2>شاخص توده بدنی</h2></div>
+  <div class="field"><label>قد (سانتی‌متر)</label><div class="box"><input id="bmiH" inputmode="decimal" placeholder="مثلاً ۱۷۵"><span class="unit">cm</span></div></div>
+  <div class="field"><label>وزن (کیلوگرم)</label><div class="box"><input id="bmiW" inputmode="decimal" placeholder="مثلاً ۷۰"><span class="unit">kg</span></div></div>
+  <button class="btn" id="bmiCalc">محاسبه BMI</button>
+  <div class="result-card" id="bmiResult" hidden><div class="big" id="bmiBig"></div><div class="lbl" id="bmiLbl"></div></div>
+</section>
+
+<!-- ======================= تاریخ و سن ======================= -->
+<section id="scr-date" class="screen">
+  <div class="top"><button class="back" data-back>‹</button><h2>تاریخ و سن</h2></div>
+  <div class="seg" id="dMode">
+    <button class="on" data-m="diff">فاصله‌ی دو تاریخ</button>
+    <button data-m="age">محاسبه‌ی سن</button>
+  </div>
+  <div id="dDiff">
+    <div class="field"><label>تاریخ اول (میلادی: سال-ماه-روز)</label><div class="box"><input id="d1" placeholder="1404-01-01" inputmode="numeric"></div></div>
+    <div class="field"><label>تاریخ دوم</label><div class="box"><input id="d2" placeholder="1404-06-15" inputmode="numeric"></div></div>
+  </div>
+  <div id="dAge" hidden>
+    <div class="field"><label>تاریخ تولد (سال-ماه-روز)</label><div class="box"><input id="d3" placeholder="1378-05-20" inputmode="numeric"></div></div>
+  </div>
+  <p style="color:var(--dim);font-size:12px;line-height:1.9;margin-bottom:10px">تاریخ‌ها را به شکل سال-ماه-روز بنویس. اگر عدد سال را به‌صورت شمسی وارد کنی (مثلاً ۱۴۰۴)، به‌صورت تقریبی به میلادی تبدیل می‌شود.</p>
+  <button class="btn" id="dCalc">محاسبه</button>
+  <div class="result-card" id="dResult" hidden><div class="big" id="dBig"></div><div class="lbl" id="dLbl"></div></div>
+</section>
+
+<!-- ======================= اقساط وام ======================= -->
+<section id="scr-loan" class="screen">
+  <div class="top"><button class="back" data-back>‹</button><h2>محاسبه‌ی اقساط وام</h2></div>
+  <div class="field"><label>مبلغ وام (تومان)</label><div class="box"><input id="lAmount" inputmode="decimal" placeholder="مثلاً ۵۰۰۰۰۰۰۰"></div></div>
+  <div class="field"><label>نرخ سود سالانه</label><div class="box"><input id="lRate" inputmode="decimal" placeholder="مثلاً ۱۸"><span class="unit">٪</span></div></div>
+  <div class="field"><label>مدت بازپرداخت</label><div class="box"><input id="lMonths" inputmode="numeric" placeholder="مثلاً ۲۴"><span class="unit">ماه</span></div></div>
+  <button class="btn" id="lCalc">محاسبه‌ی قسط</button>
+  <div class="result-card" id="lResult" hidden><div class="big" id="lBig"></div><div class="lbl" id="lLbl"></div></div>
+</section>
+
+<!-- ======================= تخفیف ======================= -->
+<section id="scr-discount" class="screen">
+  <div class="top"><button class="back" data-back>‹</button><h2>محاسبه‌ی تخفیف</h2></div>
+  <div class="field"><label>قیمت اصلی</label><div class="box"><input id="xPrice" inputmode="decimal" placeholder="مثلاً ۳۵۰۰۰۰"></div></div>
+  <div class="field"><label>درصد تخفیف</label><div class="box"><input id="xPercent" inputmode="decimal" placeholder="مثلاً ۲۵"><span class="unit">٪</span></div></div>
+  <button class="btn" id="xCalc">محاسبه</button>
+  <div class="result-card" id="xResult" hidden><div class="big" id="xBig"></div><div class="lbl" id="xLbl"></div></div>
+</section>
+
+<!-- ======================= تاریخچه ======================= -->
+<section id="scr-history" class="screen">
+  <div class="top"><button class="back" data-back>‹</button><h2>تاریخچه</h2></div>
+  <div id="hEmpty" class="empty" hidden>📋<br>هنوز محاسبه‌ای ثبت نشده</div>
+  <div id="hList"></div>
+  <button class="btn" style="background:rgba(255,93,122,.14);color:var(--danger);box-shadow:none" id="hClear">پاک کردن تاریخچه</button>
+</section>
+
+<!-- ======================= تنظیمات ======================= -->
+<section id="scr-settings" class="screen">
+  <div class="top"><button class="back" data-back>‹</button><h2>تنظیمات</h2></div>
+  <div class="sec" style="margin-top:0">نمایش</div>
+  <div class="row"><div class="t"><b>جداکننده‌ی هزارگان</b><small>نمایش عدد با ویرگول، مثل ۱٬۲۰۰</small></div><button class="sw on" id="setThousands"></button></div>
+  <div class="row"><div class="t"><b>لرزش هنگام فشار کلید</b><small>بازخورد لمسی روی دستگاه‌های پشتیبانی‌شده</small></div><button class="sw on" id="setHaptic"></button></div>
+  <div class="row"><div class="t"><b>ذخیره‌ی خودکار در تاریخچه</b><small>هر محاسبه‌ای که انجام می‌دهی ثبت شود</small></div><button class="sw on" id="setHistory"></button></div>
+  <div class="sec">داده‌ها</div>
+  <button class="btn" style="background:rgba(255,93,122,.14);color:var(--danger);box-shadow:none" id="setResetHistory">پاک کردن کل تاریخچه</button>
+  <div class="foot" style="margin-top:20px">ماشین‌حساب جامع — Eight⁸<br>نسخه <span id="verSettings"></span></div>
+</section>
+
+<!-- ======================= درباره ما ======================= -->
+<section id="scr-about" class="screen">
+  <div class="top"><button class="back" data-back>‹</button><h2>درباره ما</h2></div>
+  <div class="hero" style="padding:6px 0 4px">
+    <div class="logo">🧮</div>
+    <h1 style="font-size:19px;margin-top:10px">ماشین‌حساب جامع</h1>
+    <p style="margin-top:2px">نسخه <span id="verAbout"></span></p>
+  </div>
+  <p style="font-size:13.5px;line-height:2;color:#cfd6e4;padding:4px 4px 0">
+    Eight⁸ مجموعه‌ای برای ساخت برنامه‌های خلاقانه و کاربردی است. این ماشین‌حساب با هدف جمع کردن ابزارهای پرکاربرد روزمره در یک برنامه‌ی ساده ساخته شده. نظر، ایده یا مشکلی داشتی، خوشحال می‌شویم بشنویم.
+  </p>
+  <div class="sec">ارتباط با ما</div>
+  <button class="row" id="aboutRubika"><div class="t"><b>کانال روبیکا</b><small class="ltr" style="direction:ltr;display:block;text-align:left">@Studio_Eight8</small></div><span>➜</span></button>
+  <button class="row" id="aboutId"><div class="t"><b>ارتباط با توسعه‌دهنده</b><small class="ltr" style="direction:ltr;display:block;text-align:left">@Hesam23799</small></div><span>کپی</span></button>
+  <button class="row" id="aboutMail"><div class="t"><b>ارسال بازخورد با ایمیل</b><small class="ltr" style="direction:ltr;display:block;text-align:left">hesameghbalei1391@gmail.com</small></div><span>➜</span></button>
+  <div class="sec">حریم خصوصی</div>
+  <p style="font-size:13px;line-height:1.9;color:var(--dim);padding:0 4px">
+    این برنامه هیچ اطلاعات شخصی‌ای جمع‌آوری یا ارسال نمی‌کند. محاسبات و تاریخچه فقط روی خودِ گوشی تو ذخیره می‌مانند و به هیچ سروری فرستاده نمی‌شوند. برنامه به اینترنت هم نیاز ندارد.
+  </p>
+  <div class="foot" style="margin-top:20px">© ۲۰۲۶ Eight⁸</div>
+</section>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+const APP_VERSION = '1.0.0';
+const $=id=>document.getElementById(id);
+const qs=(s,r=document)=>r.querySelector(s);
+const qsa=(s,r=document)=>Array.from(r.querySelectorAll(s));
+$('verHome').textContent=APP_VERSION; $('verSettings').textContent=APP_VERSION; $('verAbout').textContent=APP_VERSION;
+
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); }
+  catch(e){ const a=document.createElement('textarea'); a.value=t; document.body.appendChild(a); a.select();
+    try{document.execCommand('copy');}catch(_){} a.remove(); }
+  toast('کپی شد');
+}
+$('aboutRubika').onclick=()=>{ window.open('https://rubika.ir/Studio_Eight8','_blank','noopener'); };
+$('aboutId').onclick=()=>copyText('@Hesam23799');
+$('aboutMail').onclick=()=>{
+  const url='mailto:hesameghbalei1391@gmail.com?subject='+encodeURIComponent('بازخورد ماشین‌حساب جامع '+APP_VERSION);
+  window.open(url,'_blank');
+};
+
+/* ---------- حافظه‌ی ساده ---------- */
+const store={
+  get(k,d){try{const v=localStorage.getItem('calc_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem('calc_'+k,JSON.stringify(v));}catch(e){}}
+};
+let SET = Object.assign({thousands:true,haptic:true,history:true}, store.get('settings',{}));
+function saveSet(){store.set('settings',SET);}
+function applySet(){
+  $('setThousands').classList.toggle('on',SET.thousands);
+  $('setHaptic').classList.toggle('on',SET.haptic);
+  $('setHistory').classList.toggle('on',SET.history);
+}
+qsa('.sw').forEach(sw=>{
+  const map={setThousands:'thousands',setHaptic:'haptic',setHistory:'history'};
+  if(!map[sw.id]) return;
+  sw.onclick=()=>{SET[map[sw.id]]=!SET[map[sw.id]];saveSet();applySet();
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));};
+});
+
+let toastT=null;
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2000);}
+function vibrate(){if(SET.haptic && navigator.vibrate) navigator.vibrate(8);}
+function fmt(n){
+  if(!isFinite(n)) return 'نامعتبر';
+  const neg = n<0; n=Math.abs(n);
+  let s = (Math.round(n*1e8)/1e8).toString();
+  if(!SET.thousands) return (neg?'-':'')+s;
+  let [i,f]=s.split('.');
+  i = i.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  return (neg?'-':'')+i+(f?'.'+f:'');
+}
+
+/* ---------- تاریخچه ---------- */
+function addHistory(expr,result){
+  if(!SET.history) return;
+  const list=store.get('history',[]);
+  list.unshift({expr,result,t:Date.now()});
+  store.set('history',list.slice(0,100));
+}
+function renderHistory(){
+  const list=store.get('history',[]);
+  $('hEmpty').hidden = list.length>0;
+  const box=$('hList'); box.innerHTML='';
+  list.forEach(it=>{
+    const d=document.createElement('div'); d.className='hrow';
+    d.innerHTML='<span class="ex"></span><span class="rs"></span>';
+    d.querySelector('.ex').textContent=it.expr;
+    d.querySelector('.rs').textContent=it.result;
+    box.appendChild(d);
+  });
+}
+$('hClear').onclick=$('setResetHistory').onclick=()=>{store.set('history',[]);renderHistory();toast('تاریخچه پاک شد');};
+
+/* ---------- ناوبری ---------- */
+const SCREENS=['home','basic','sci','conv','percent','bmi','date','loan','discount','history','settings','about'];
+let cur='home';
+function show(name){cur=name;SCREENS.forEach(s=>$('scr-'+s).classList.toggle('active',s===name));$('scr-'+name).scrollTop=0;if(name==='history')renderHistory();}
+function go(name){if(name===cur)return;history.pushState({s:name},'');show(name);}
+history.replaceState({s:'home'},'');
+addEventListener('popstate',e=>{const st=e.state||{s:'home'};show(st.s);});
+qsa('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+qsa('[data-back]').forEach(b=>b.onclick=()=>history.back());
+
+/* =====================================================================
+   ماشین‌حساب ساده
+   ===================================================================== */
+(function(){
+  let expr='', justEq=false;
+  const OPS={'+':'+','−':'-','×':'*','÷':'/'};
+  const layout=[
+    ['AC','⌫','%','÷'],
+    ['7','8','9','×'],
+    ['4','5','6','−'],
+    ['1','2','3','+'],
+    ['0','.','=']
+  ];
+  const box=$('bKeys');
+  layout.flat().forEach(k=>{
+    const b=document.createElement('button'); b.className='key'; b.textContent=k;
+    if(k==='=') {b.classList.add('eq');}
+    else if(['÷','×','−','+'].includes(k)) b.classList.add('op');
+    else if(k==='AC'||k==='⌫'||k==='%') b.classList.add('fn');
+    if(k==='0') b.classList.add('wide');
+    b.onclick=()=>press(k);
+    box.appendChild(b);
+  });
+  function evaluate(e){
+    const safe=e.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/%/g,'/100');
+    if(!/^[0-9+\-*/.()\s]+$/.test(safe)) throw new Error('bad');
+    // eslint-disable-next-line no-new-func
+    return Function('"use strict";return ('+safe+')')();
+  }
+  function render(){
+    $('bExpr').textContent = expr || '\u00A0';
+    try{ $('bVal').textContent = expr ? fmt(evaluate(expr)) : '۰'; }
+    catch(e){ $('bVal').textContent = expr.slice(-1).match(/[+\-*/.]/)? fmt(evaluate(expr.slice(0,-1)||'0')) : '۰'; }
+  }
+  function press(k){
+    vibrate();
+    if(k==='AC'){expr='';justEq=false;render();return;}
+    if(k==='⌫'){expr=expr.slice(0,-1);render();return;}
+    if(k==='='){
+      try{
+        const r=evaluate(expr||'0');
+        addHistory(expr,fmt(r));
+        expr=String(r); justEq=true;
+      }catch(e){ $('bVal').textContent='خطا'; }
+      render(); return;
+    }
+    if(justEq && /[0-9.]/.test(k)) expr='';
+    justEq=false;
+    expr+=k; render();
+  }
+  render();
+})();
+
+/* =====================================================================
+   ماشین‌حساب علمی
+   ===================================================================== */
+(function(){
+  let expr='', justEq=false, deg=true;
+  $('sDeg').onclick=()=>{deg=true;$('sDeg').classList.add('on');$('sRad').classList.remove('on');};
+  $('sRad').onclick=()=>{deg=false;$('sRad').classList.add('on');$('sDeg').classList.remove('on');};
+  const layout=[
+    ['sin','cos','tan','(',')'],
+    ['ln','log','√','x²','xʸ'],
+    ['AC','⌫','%','÷','×'],
+    ['7','8','9','−','π'],
+    ['4','5','6','+','e'],
+    ['1','2','3','0','.'],
+    ['=']
+  ];
+  const box=$('sKeys');
+  layout.flat().forEach(k=>{
+    const b=document.createElement('button'); b.className='key'; b.textContent=k;
+    if(k==='=') {b.classList.add('eq'); b.style.gridColumn='span 5';}
+    else if(['÷','×','−','+'].includes(k)) b.classList.add('op');
+    else if(['AC','⌫','%','sin','cos','tan','ln','log','√','x²','xʸ'].includes(k)) b.classList.add('fn');
+    b.onclick=()=>press(k);
+    box.appendChild(b);
+  });
+  function toSafe(e){
+    let s=e.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/%/g,'/100')
+      .replace(/π/g,'(Math.PI)').replace(/e(?![a-zA-Z])/g,'(Math.E)')
+      .replace(/√\(/g,'Math.sqrt(').replace(/√(\d+(\.\d+)?)/g,'Math.sqrt($1)')
+      .replace(/ln\(/g,'Math.log(').replace(/log\(/g,'Math.log10(')
+      .replace(/(\d+(\.\d+)?)x²/g,'Math.pow($1,2)').replace(/x²/g,'')
+      .replace(/(\d+(\.\d+)?)xʸ(\d+(\.\d+)?)/g,'Math.pow($1,$3)');
+    const trig=(fn,v)=> deg? `Math.${fn}((${v})*Math.PI/180)` : `Math.${fn}(${v})`;
+    s=s.replace(/sin\(([^()]*)\)/g,(m,v)=>trig('sin',v));
+    s=s.replace(/cos\(([^()]*)\)/g,(m,v)=>trig('cos',v));
+    s=s.replace(/tan\(([^()]*)\)/g,(m,v)=>trig('tan',v));
+    return s;
+  }
+  function evaluate(e){
+    const s=toSafe(e);
+    if(!/^[0-9+\-*/.()\sA-Za-z,]+$/.test(s)) throw new Error('bad');
+    // eslint-disable-next-line no-new-func
+    return Function('"use strict";return ('+s+')')();
+  }
+  function render(){
+    $('sExpr').textContent=expr||'\u00A0';
+    try{ $('sVal').textContent= expr? fmt(evaluate(expr)) : '۰'; }
+    catch(e){ /* keep previous */ }
+  }
+  function press(k){
+    vibrate();
+    if(k==='AC'){expr='';render();return;}
+    if(k==='⌫'){expr=expr.slice(0,-1);render();return;}
+    if(k==='='){
+      try{ const r=evaluate(expr||'0'); addHistory(expr,fmt(r)); expr=String(r); justEq=true; }
+      catch(e){ $('sVal').textContent='خطا'; }
+      render(); return;
+    }
+    if(['sin','cos','tan','ln','log'].includes(k)){ expr+=k+'('; render(); return; }
+    if(k==='√'){
+      const m=expr.match(/(\d+(\.\d+)?)$/);
+      if(m){ expr=expr.slice(0,-m[0].length)+'√('+m[0]+')'; }
+      else expr+='√(';
+      render(); return;
+    }
+    if(justEq && /[0-9.]/.test(k)) expr='';
+    justEq=false;
+    expr+=k; render();
+  }
+  render();
+})();
+
+/* =====================================================================
+   تبدیل واحد
+   ===================================================================== */
+(function(){
+  const CATS={
+    length:{label:'طول', base:'m', units:{
+      mm:{label:'میلی‌متر',f:.001}, cm:{label:'سانتی‌متر',f:.01}, m:{label:'متر',f:1},
+      km:{label:'کیلومتر',f:1000}, inch:{label:'اینچ',f:.0254}, ft:{label:'فوت',f:.3048},
+      mile:{label:'مایل',f:1609.344}
+    }},
+    weight:{label:'وزن', base:'kg', units:{
+      mg:{label:'میلی‌گرم',f:.000001}, g:{label:'گرم',f:.001}, kg:{label:'کیلوگرم',f:1},
+      ton:{label:'تن',f:1000}, lb:{label:'پوند',f:.45359237}, oz:{label:'اونس',f:.0283495}
+    }},
+    temp:{label:'دما', base:'c', special:true},
+    area:{label:'مساحت', base:'m2', units:{
+      m2:{label:'متر مربع',f:1}, km2:{label:'کیلومتر مربع',f:1e6},
+      hectare:{label:'هکتار',f:10000}, acre:{label:'ایکر',f:4046.8564224}
+    }},
+    speed:{label:'سرعت', base:'kmh', units:{
+      kmh:{label:'کیلومتر بر ساعت',f:1}, ms:{label:'متر بر ثانیه',f:3.6}, mph:{label:'مایل بر ساعت',f:1.609344}
+    }}
+  };
+  let cat='length';
+  const chips=$('convCats');
+  Object.entries(CATS).forEach(([k,v])=>{
+    const b=document.createElement('button'); b.className='chip'+(k===cat?' on':''); b.textContent=v.label;
+    b.onclick=()=>{cat=k; qsa('.chip',chips).forEach(c=>c.classList.remove('on')); b.classList.add('on'); fillUnits(); calc();};
+    chips.appendChild(b);
+  });
+  function fillUnits(){
+    const c=CATS[cat];
+    const opts = c.special ? {c:{label:'سلسیوس'},f:{label:'فارنهایت'},k:{label:'کلوین'}} : c.units;
+    [$('cFromUnit'),$('cToUnit')].forEach((sel,i)=>{
+      sel.innerHTML='';
+      Object.entries(opts).forEach(([k,v])=>{
+        const o=document.createElement('option'); o.value=k; o.textContent=v.label; sel.appendChild(o);
+      });
+      sel.selectedIndex = i===0?0:Math.min(1,sel.options.length-1);
+    });
+  }
+  function tempTo(v,u){ // به سلسیوس
+    if(u==='c') return v; if(u==='f') return (v-32)*5/9; return v-273.15;
+  }
+  function tempFrom(v,u){
+    if(u==='c') return v; if(u==='f') return v*9/5+32; return v+273.15;
+  }
+  function calc(){
+    const from=$('cFromUnit').value, to=$('cToUnit').value;
+    const val=parseFloat($('cFromVal').value); 
+    if(isNaN(val)){ $('cToVal').value='0'; return; }
+    let out;
+    if(cat==='temp'){ out = tempFrom(tempTo(val,from),to); }
+    else { const c=CATS[cat]; const base=val*c.units[from].f; out=base/c.units[to].f; }
+    $('cToVal').value = fmt(out);
+  }
+  $('cFromVal').oninput=calc;
+  $('cFromUnit').onchange=calc;
+  $('cToUnit').onchange=calc;
+  $('cSwap').onclick=()=>{
+    const fu=$('cFromUnit'), tu=$('cToUnit');
+    const tmp=fu.value; fu.value=tu.value; tu.value=tmp;
+    $('cFromVal').value=$('cToVal').value.replace(/,/g,'');
+    calc();
+  };
+  fillUnits(); calc();
+})();
+
+/* =====================================================================
+   درصد
+   ===================================================================== */
+(function(){
+  qsa('#pMode button').forEach(b=>b.onclick=()=>{
+    qsa('#pMode button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    $('pOf').hidden = b.dataset.m!=='of'; $('pChange').hidden = b.dataset.m!=='change';
+    $('pResult').hidden=true;
+  });
+  $('pCalc').onclick=()=>{
+    const mode = qs('#pMode button.on').dataset.m;
+    if(mode==='of'){
+      const p=parseFloat($('p1').value), n=parseFloat($('p2').value);
+      if(isNaN(p)||isNaN(n)){toast('مقادیر را کامل وارد کن');return;}
+      const r=p/100*n;
+      $('pBig').textContent=fmt(r);
+      $('pLbl').textContent=`${fmt(p)}٪ از ${fmt(n)} برابر است با ${fmt(r)}`;
+      addHistory(`${p}% of ${n}`, fmt(r));
+    } else {
+      const a=parseFloat($('p3').value), b=parseFloat($('p4').value);
+      if(isNaN(a)||isNaN(b)||a===0){toast('مقادیر را کامل وارد کن');return;}
+      const r=((b-a)/a)*100;
+      $('pBig').textContent=(r>=0?'+':'')+fmt(r)+'٪';
+      $('pLbl').textContent= r>=0? `افزایش ${fmt(Math.abs(r))} درصدی نسبت به مقدار اول` : `کاهش ${fmt(Math.abs(r))} درصدی نسبت به مقدار اول`;
+      addHistory(`${a} → ${b}`, fmt(r)+'%');
+    }
+    $('pResult').hidden=false;
+  };
+})();
+
+/* =====================================================================
+   BMI
+   ===================================================================== */
+$('bmiCalc').onclick=()=>{
+  const h=parseFloat($('bmiH').value)/100, w=parseFloat($('bmiW').value);
+  if(!h||!w){toast('قد و وزن را وارد کن');return;}
+  const bmi=w/(h*h);
+  const card=$('bmiResult'); card.className='result-card';
+  let label;
+  if(bmi<18.5){label='کمبود وزن';card.classList.add('warn');}
+  else if(bmi<25){label='وزن طبیعی';}
+  else if(bmi<30){label='اضافه‌وزن';card.classList.add('warn');}
+  else {label='چاقی';card.classList.add('bad');}
+  $('bmiBig').textContent=fmt(bmi);
+  $('bmiLbl').textContent=label+' — این عدد فقط یک راهنمای کلی است و جایگزین نظر پزشک نیست.';
+  card.hidden=false;
+  addHistory(`BMI (h=${$('bmiH').value}, w=${$('bmiW').value})`, fmt(bmi));
+};
+
+/* =====================================================================
+   تاریخ و سن
+   ===================================================================== */
+qsa('#dMode button').forEach(b=>b.onclick=()=>{
+  qsa('#dMode button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  $('dDiff').hidden = b.dataset.m!=='diff'; $('dAge').hidden = b.dataset.m!=='age';
+  $('dResult').hidden=true;
+});
+function parseDateFlexible(s){
+  s=s.trim(); const m=s.match(/^(\d{3,4})[-/](\d{1,2})[-/](\d{1,2})$/);
+  if(!m) return null;
+  let [,y,mo,d]=m.map(Number);
+  if(y<1700) y+=621; // تبدیل تقریبی شمسی به میلادی
+  return new Date(Date.UTC(y,mo-1,d));
+}
+$('dCalc').onclick=()=>{
+  const mode=qs('#dMode button.on').dataset.m;
+  if(mode==='diff'){
+    const a=parseDateFlexible($('d1').value), b=parseDateFlexible($('d2').value);
+    if(!a||!b){toast('تاریخ را به شکل سال-ماه-روز وارد کن');return;}
+    const days=Math.round(Math.abs(b-a)/86400000);
+    $('dBig').textContent=fmt(days)+' روز';
+    $('dLbl').textContent=`تقریباً ${fmt(Math.floor(days/365))} سال و ${fmt(Math.floor((days%365)/30))} ماه`;
+    addHistory(`${$('d1').value} .. ${$('d2').value}`, days+' روز');
+  } else {
+    const a=parseDateFlexible($('d3').value);
+    if(!a){toast('تاریخ تولد را وارد کن');return;}
+    const now=new Date();
+    let years=now.getUTCFullYear()-a.getUTCFullYear();
+    let months=now.getUTCMonth()-a.getUTCMonth();
+    let days=now.getUTCDate()-a.getUTCDate();
+    if(days<0){months--;}
+    if(months<0){years--;months+=12;}
+    $('dBig').textContent=`${fmt(years)} سال`;
+    $('dLbl').textContent=`و ${fmt(months)} ماه و ${fmt(Math.abs(days))} روز`;
+    addHistory(`سن از ${$('d3').value}`, years+' سال');
+  }
+  $('dResult').hidden=false;
+};
+
+/* =====================================================================
+   اقساط وام
+   ===================================================================== */
+$('lCalc').onclick=()=>{
+  const P=parseFloat($('lAmount').value), annual=parseFloat($('lRate').value), n=parseInt($('lMonths').value);
+  if(!P||!n){toast('مقادیر را کامل وارد کن');return;}
+  const r=(annual||0)/100/12;
+  let pay;
+  if(r===0) pay=P/n;
+  else pay = P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+  const total=pay*n;
+  $('lBig').textContent=fmt(Math.round(pay))+' تومان';
+  $('lLbl').textContent=`قسط ماهانه — مجموع بازپرداخت: ${fmt(Math.round(total))} تومان`;
+  $('lResult').hidden=false;
+  addHistory(`وام ${$('lAmount').value} / ${n} ماه`, fmt(Math.round(pay)));
+};
+
+/* =====================================================================
+   تخفیف
+   ===================================================================== */
+$('xCalc').onclick=()=>{
+  const price=parseFloat($('xPrice').value), pct=parseFloat($('xPercent').value);
+  if(!price||isNaN(pct)){toast('مقادیر را کامل وارد کن');return;}
+  const off=price*pct/100, final=price-off;
+  $('xBig').textContent=fmt(final)+' تومان';
+  $('xLbl').textContent=`مبلغ تخفیف: ${fmt(off)} تومان از ${fmt(price)} تومان`;
+  $('xResult').hidden=false;
+  addHistory(`تخفیف ${pct}% از ${price}`, fmt(final));
+};
+
+applySet();
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
