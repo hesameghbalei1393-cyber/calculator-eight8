@@ -1,0 +1,98 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  APP_ID: com.eight8.calculator
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Create Capacitor project
+        run: |
+          mkdir -p cap
+          cd cap
+          npm init -y
+          npm install @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
+          mkdir -p www
+          cp ../index.html ../manifest.json ../icon-192.png ../icon-512.png www/
+          npx cap init Calculator "$APP_ID" --web-dir www
+
+      - name: Add Android platform
+        run: |
+          cd cap
+          npx cap add android
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26
+          find android/app/src/main/res -name 'ic_launcher*.png' -exec cp www/icon-192.png {} \;
+          sed -i 's#<string name="\(app_name\|title_activity_main\)">.*</string>#<string name="\1">ماشین‌حساب جامع</string>#' android/app/src/main/res/values/strings.xml
+          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/; s/versionName \"[^\"]*\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
+          npx cap sync android
+
+      - name: Prepare signing key
+        if: env.SIGNING_PASSWORD != ''
+        run: |
+          mkdir -p signing
+          if [ -f signing/release.jks.enc ]; then
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -in signing/release.jks.enc -out "$RUNNER_TEMP/release.jks" -pass env:SIGNING_PASSWORD
+          else
+            keytool -genkeypair -keystore "$RUNNER_TEMP/release.jks" -storetype PKCS12 -alias calc -keyalg RSA -keysize 2048 -validity 10000 -storepass "$SIGNING_PASSWORD" -keypass "$SIGNING_PASSWORD" -dname "CN=Eight8, O=Eight8, C=IR"
+            openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt -in "$RUNNER_TEMP/release.jks" -out signing/release.jks.enc -pass env:SIGNING_PASSWORD
+            git config user.name "github-actions"
+            git config user.email "actions@github.com"
+            git add signing/release.jks.enc
+            git commit -m "Add encrypted signing key"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
+
+      - name: Build signed release APK
+        if: env.SIGNING_PASSWORD != ''
+        run: |
+          cd cap/android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          "$BT/zipalign" -p -f 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
+          "$BT/apksigner" sign --ks "$RUNNER_TEMP/release.jks" --ks-pass env:SIGNING_PASSWORD --key-pass env:SIGNING_PASSWORD --ks-key-alias calc --out "$GITHUB_WORKSPACE/Calculator-release.apk" "$RUNNER_TEMP/aligned.apk"
+
+      - name: Build debug APK (no signing password set)
+        if: env.SIGNING_PASSWORD == ''
+        run: |
+          cd cap/android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/Calculator-debug.apk"
+
+      - name: Upload APK (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Calculator-apk
+          path: Calculator-*.apk
+
+      - name: Publish APK as a Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Calculator ${{ github.run_number }}
+          prerelease: ${{ env.SIGNING_PASSWORD == '' }}
+          files: Calculator-*.apk
