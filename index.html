@@ -70,13 +70,14 @@ input{font:inherit;color:inherit;background:none;border:0}
 .keys.sci .key{padding:14px 0;font-size:15px}
 
 /* ---- تبدیل واحد ---- */
-.conv-box{background:var(--s1);border:1px solid var(--bd);border-radius:18px;padding:16px;margin-bottom:12px}
-.conv-row{display:flex;align-items:center;gap:10px}
-.conv-row input{flex:1;font-size:24px;direction:ltr;text-align:left}
-.conv-row select{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;color:var(--tx);font-size:13.5px}
+.conv-box{background:var(--s1);border:1px solid var(--bd);border-radius:18px;padding:14px;margin-bottom:12px}
+.conv-row{display:flex;align-items:center;gap:8px;min-width:0}
+.conv-row input{flex:1 1 auto;min-width:0;width:0;font-size:20px;direction:ltr;text-align:left;overflow-x:auto}
+.conv-row select{flex:0 1 auto;min-width:0;max-width:46%;background:var(--s2);border:1px solid var(--bd);border-radius:12px;
+  padding:9px 8px;color:var(--tx);font-size:12.5px;text-overflow:ellipsis}
 .swap{width:44px;height:44px;border-radius:14px;background:var(--s2);display:grid;place-items:center;margin:8px auto;font-size:18px}
-.chiprow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.chip{padding:8px 14px;border-radius:999px;background:var(--s1);border:1px solid var(--bd);font-size:12.5px;color:var(--dim)}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;max-width:100%}
+.chip{padding:8px 14px;border-radius:999px;background:var(--s1);border:1px solid var(--bd);font-size:12.5px;color:var(--dim);white-space:nowrap}
 .chip.on{background:rgba(61,220,151,.16);color:var(--ac2);border-color:rgba(61,220,151,.35)}
 
 /* ---- فرم‌های عمومی (BMI، تاریخ، درصد، وام) ---- */
